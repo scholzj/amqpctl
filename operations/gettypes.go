@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"strings"
 	"os"
-	"qpid.apache.org/electron"
-	"qpid.apache.org/amqp"
-	"time"
 	"text/tabwriter"
+	"./utils"
+	"qpid.apache.org/amqp"
 )
 
 func GetTypes(args []string) {
@@ -30,95 +29,40 @@ Description:
 		return
 	}
 
-	// Get types from the management endpoint
-	container := electron.NewContainer(fmt.Sprintf("myContainer"))
-
-	conn, err := container.Dial("tcp", "localhost:5672")
+	link := utils.MgmtLink{}
+	err = link.Connect()
 	if err != nil {
-		fmt.Printf("Failed to open AMQP connection: %s", err)
+		fmt.Printf("Ups, something went wrong: %v\n", err.Error())
 		os.Exit(1)
 	}
 
-	sess, err := conn.Session(electron.IncomingCapacity(1024000), electron.OutgoingWindow(1024))
-	if err != nil {
-		fmt.Printf("Something went wrong: %s", err)
-		os.Exit(1)
-	}
+	defer link.Close()
 
-	recv, err := sess.Receiver(electron.Source("tempAddress"), electron.Capacity(100), electron.Prefetch(true))
-	if err != nil {
-		fmt.Printf("Something went wrong: %s", err)
-		os.Exit(1)
-	}
+	var reqProperties map[string]interface{}
 
-	snd, err := sess.Sender(electron.Target("$management"))
-	if err != nil {
-		fmt.Printf("Something went wrong: %s", err)
-		os.Exit(1)
-	}
-
-	m := amqp.NewMessage()
-	m.SetReplyTo("tempAddress")
 	if arguments["<entityType>"] != nil {
-		m.SetProperties(map[string]interface{}{"operation": "GET-TYPES", "entityType": arguments["<entityType>"]})
+		reqProperties = map[string]interface{}{"operation": "GET-TYPES", "entityType": arguments["<entityType>"]}
 	} else {
-		m.SetProperties(map[string]interface{}{"operation": "GET-TYPES"})
-	}
-	//
-	body := map[string]interface{}{"attributeNames": []string{}}
-	m.Marshal(body)
-
-	res := snd.SendSync(m)
-	if res.Error != nil {
-		fmt.Printf("Failed to send message: %s\n", res.Error)
-		os.Exit(1)
+		reqProperties = map[string]interface{}{"operation": "GET-TYPES"}
 	}
 
-	msg, err := recv.ReceiveTimeout(time.Duration(10 * time.Second))
-	//msg, err := recv.Receive()
+	respProperties, respBody, err := link.Operation(reqProperties, nil)
 
 	if err == nil {
-		//fmt.Printf("Message received: %s\n", msg.Message.Body())
-		parseResult(msg.Message)
-		msg.Accept()
-
-	} else if err == electron.Timeout {
-		fmt.Printf("No message received\n")
+		printResults(respProperties, respBody)
 	} else {
-		fmt.Printf("Something went wrong: %s\n", err)
+		fmt.Printf("Ups, something went wrong: %v\n", err.Error())
 		os.Exit(1)
 	}
-
-	conn.Close(nil)
 }
 
-func parseResult(m amqp.Message) {
-	// Parse the properties
-	/*props := m.Properties()
-	fmt.Printf("Status code:\t%v\n", props["statusCode"])*/
-	/*for k, v := range props {
-		fmt.Printf("    %v: %v\n", k, v)
-	}*/
-
-	types := m.Body().(amqp.Map)
-	/*types := body["attributeNames"].(amqp.List)
-	res := body["results"].(amqp.List)
-
-	for _, listener := range res {
-		fmt.Print("Connectors:\n")
-		for i, v := range listener.(amqp.List) {
-			//if v != nil {
-			fmt.Printf("    %s: %v\n", atts[i], v)
-			//}
-		}
-	}*/
-
+func printResults(properties map[string]interface{}, body map[interface{}]interface{}) {
 	w := tabwriter.NewWriter(os.Stdout, 10, 4, 3, ' ', 0)
 	fmt.Fprint(w, "TYPE\tPARENTS\t\n")
 
-	for entitytype, extends := range types {
-		parents := make([]string, len(extends.(amqp.List)))
-		for i, parent := range extends.(amqp.List) {
+	for entitytype, extends := range body {
+		parents := make([]string, len([]interface{}(extends.(amqp.List))))
+		for i, parent := range []interface{}(extends.(amqp.List)) {
 			parents[i] = parent.(string)
 		}
 
@@ -127,8 +71,4 @@ func parseResult(m amqp.Message) {
 	}
 
 	w.Flush()
-}
-
-func printResult() {
-
 }
