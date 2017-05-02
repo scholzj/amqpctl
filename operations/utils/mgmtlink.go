@@ -49,7 +49,7 @@ func (l *MgmtLink) Close() {
 	l.connection.Close(nil)
 }
 
-func (l *MgmtLink) Operation(reqProperties map[string]interface{}, reqBody map[interface{}]interface{}) (respProperties map[string]interface{}, respBody map[interface{}]interface{}, err error) {
+func (l *MgmtLink) Operation(reqProperties map[string]interface{}, reqBody map[interface{}]interface{}) (respProperties map[string]interface{}, respBody interface{}, err error) {
 	err = nil
 	respProperties = nil
 	respBody = nil
@@ -81,8 +81,8 @@ func (l *MgmtLink) Operation(reqProperties map[string]interface{}, reqBody map[i
 	}
 }
 
-func (l *MgmtLink) parseResponse(msg amqp.Message) (properties map[string]interface{}, body map[interface{}]interface{}) {
+func (l *MgmtLink) parseResponse(msg amqp.Message) (properties map[string]interface{}, body interface{}) {
 	properties = msg.Properties()
-	body = map[interface{}]interface{}(msg.Body().(amqp.Map))
+	body = msg.Body()
 	return
 }

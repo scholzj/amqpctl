@@ -10,15 +10,15 @@ import (
 	"qpid.apache.org/amqp"
 )
 
-func GetTypes(args []string) {
+func GetMgmtNodes(args []string) {
 	usage := `Usage:
-  amqpctl gettypes [<entityType>]
+  amqpctl getmgmtnodes
 
 Options:
   -h --help   Show this screen.
 
 Description:
-  Get list of supported manageable entity types.
+  Get list of addresses of other management nodes which this management node is aware of.
 `
 	arguments, err := docopt.Parse(usage, args, true, "", false, false)
 	if err != nil {
@@ -39,35 +39,23 @@ Description:
 	defer link.Close()
 
 	var reqProperties map[string]interface{}
-
-	if arguments["<entityType>"] != nil {
-		reqProperties = map[string]interface{}{"operation": "GET-TYPES", "entityType": arguments["<entityType>"]}
-	} else {
-		reqProperties = map[string]interface{}{"operation": "GET-TYPES"}
-	}
-
+	reqProperties = map[string]interface{}{"operation": "GET-MGMT-NODES"}
 	respProperties, respBody, err := link.Operation(reqProperties, nil)
 
 	if err == nil {
-		printTypes(respProperties, respBody)
+		printMgmtNodes(respProperties, respBody)
 	} else {
 		fmt.Printf("Ups, something went wrong: %v\n", err.Error())
 		os.Exit(1)
 	}
 }
 
-func printTypes(properties map[string]interface{}, body interface{}) {
+func printMgmtNodes(properties map[string]interface{}, body interface{}) {
 	w := tabwriter.NewWriter(os.Stdout, 10, 4, 3, ' ', 0)
-	fmt.Fprint(w, "TYPE\tPARENTS\t\n")
+	fmt.Fprint(w, "MGMTNODE\t\n")
 
-	for entitytype, extends := range map[interface{}]interface{}(body.(amqp.Map)) {
-		parents := make([]string, len([]interface{}(extends.(amqp.List))))
-		for i, parent := range []interface{}(extends.(amqp.List)) {
-			parents[i] = parent.(string)
-		}
-
-
-		fmt.Fprintf(w, "%v\t%v\t\n", entitytype, strings.Join(parents, ", "))
+	for _, address := range []interface{}(body.(amqp.List)) {
+		fmt.Fprintf(w, "%v\t\n", address)
 	}
 
 	w.Flush()

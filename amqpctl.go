@@ -11,9 +11,12 @@ func main() {
 	usage := `Usage:
   amqpctl [options] <operation> [<args>...]
 
-    gettypes    Create a resource by filename or stdin.
-    replace   Replace a resource by filename or stdin.
-    version   Display the version of amqpctl.
+    gettypes    	Get list of supported types
+    getattributes   	Get list of attributes supported by entity types
+    getoperations   	Get list of operations supported by entity types
+    getannotations   	Get list of annotations supported by entity types
+    getmgmtnodes	Get list of other management nodes
+    version   		Display the version of amqpctl.
 
 Options:
   -h --help               Show this screen.
@@ -36,6 +39,14 @@ Description:
 			operations.Version(args)
 		case "gettypes":
 			operations.GetTypes(args)
+		case "getattributes":
+			operations.GetAttributes(args)
+		case "getoperations":
+			operations.GetOperations(args)
+		case "getannotations":
+			operations.GetAnnotations(args)
+		case "getmgmtnodes":
+			operations.GetMgmtNodes(args)
 		/*case "create":
 			commands.Create(args)
 		case "replace":

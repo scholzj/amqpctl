@@ -10,15 +10,15 @@ import (
 	"qpid.apache.org/amqp"
 )
 
-func GetTypes(args []string) {
+func GetAnnotations(args []string) {
 	usage := `Usage:
-  amqpctl gettypes [<entityType>]
+  amqpctl getannotations [<entityType>]
 
 Options:
   -h --help   Show this screen.
 
 Description:
-  Get list of supported manageable entity types.
+  Get list of annotations implemented by the manageable entity types.
 `
 	arguments, err := docopt.Parse(usage, args, true, "", false, false)
 	if err != nil {
@@ -41,33 +41,33 @@ Description:
 	var reqProperties map[string]interface{}
 
 	if arguments["<entityType>"] != nil {
-		reqProperties = map[string]interface{}{"operation": "GET-TYPES", "entityType": arguments["<entityType>"]}
+		reqProperties = map[string]interface{}{"operation": "GET-ANNOTATIONS", "entityType": arguments["<entityType>"]}
 	} else {
-		reqProperties = map[string]interface{}{"operation": "GET-TYPES"}
+		reqProperties = map[string]interface{}{"operation": "GET-ANNOTATIONS"}
 	}
 
 	respProperties, respBody, err := link.Operation(reqProperties, nil)
 
 	if err == nil {
-		printTypes(respProperties, respBody)
+		printAnnotations(respProperties, respBody)
 	} else {
 		fmt.Printf("Ups, something went wrong: %v\n", err.Error())
 		os.Exit(1)
 	}
 }
 
-func printTypes(properties map[string]interface{}, body interface{}) {
+func printAnnotations(properties map[string]interface{}, body interface{}) {
 	w := tabwriter.NewWriter(os.Stdout, 10, 4, 3, ' ', 0)
-	fmt.Fprint(w, "TYPE\tPARENTS\t\n")
+	fmt.Fprint(w, "TYPE\tANNOTATIONS\t\n")
 
-	for entitytype, extends := range map[interface{}]interface{}(body.(amqp.Map)) {
-		parents := make([]string, len([]interface{}(extends.(amqp.List))))
-		for i, parent := range []interface{}(extends.(amqp.List)) {
-			parents[i] = parent.(string)
+	for entitytype, annotationsList := range map[interface{}]interface{}(body.(amqp.Map)) {
+		annotationsArray := make([]string, len([]interface{}(annotationsList.(amqp.List))))
+		for i, annotation := range []interface{}(annotationsList.(amqp.List)) {
+			annotationsArray[i] = annotation.(string)
 		}
 
 
-		fmt.Fprintf(w, "%v\t%v\t\n", entitytype, strings.Join(parents, ", "))
+		fmt.Fprintf(w, "%v\t%v\t\n", entitytype, strings.Join(annotationsArray, ", "))
 	}
 
 	w.Flush()
