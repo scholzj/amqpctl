@@ -11,6 +11,7 @@ func main() {
 	usage := `Usage:
   amqpctl [options] <operation> [<args>...]
 
+    query 	   	Query selected attributes of Management entities
     gettypes    	Get list of supported types
     getattributes   	Get list of attributes supported by entity types
     getoperations   	Get list of operations supported by entity types
@@ -37,6 +38,8 @@ Description:
 		switch operation {
 		case "version":
 			operations.Version(args)
+		case "query":
+			operations.Query(args)
 		case "gettypes":
 			operations.GetTypes(args)
 		case "getattributes":
