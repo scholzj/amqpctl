@@ -14,11 +14,16 @@ func Query(args []string) {
 	usage := `Usage:
   amqpctl query [<entityType>] [<attributes>...]
 
+    entityType		Query only for specific entity type
+    attributes		Retrive only selected attributes
+                        If now attribute is specified name, type and identity will be retrieved
+                        If set to - all available attributes will be returned
+
 Options:
   -h --help   Show this screen.
 
 Description:
-  Query selected attributes of Management entities
+  Query selected attributes of Management entities.
 `
 	arguments, err := docopt.Parse(usage, args, true, "", false, false)
 	if err != nil {
@@ -49,7 +54,7 @@ Description:
 	var reqBody map[interface{}]interface{}
 
 	if len(arguments["<attributes>"].([]string)) > 0 {
-		if len(arguments["<attributes>"].([]string)) == 1 && arguments["<attributes>"].([]string)[0] == "%" {
+		if len(arguments["<attributes>"].([]string)) == 1 && arguments["<attributes>"].([]string)[0] == "-" {
 			reqBody = map[interface{}]interface{}{"attributeNames": []string{}}
 		} else {
 			reqBody = map[interface{}]interface{}{"attributeNames": arguments["<attributes>"].([]string)}
