@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"./operations"
+	"./utils"
 )
 
 func main() {
@@ -20,36 +21,37 @@ func main() {
     version   		Display the version of amqpctl.
 
 Options:
-  -h --help               Show this screen.
-  -l --log-level=<level>  Set the log level (one of panic, fatal, error,
-                          warn, info, debug) [default: panic]
+  --hostname HOSTNAME	AMQP hostname (default localhost)
+  --port PORT		AMQP port (default 5672)
+  -h --help             Show this screen.
 
 Description:
   The amqpctl command line tool implements AMQP Management specification
 
   See 'amqpctl <operation> --help' to read about a specific operations.
 `
-	arguments, _ := docopt.Parse(usage, nil, true, "0.0.1", true, false)
+	arguments, _ := docopt.Parse(usage, nil, true, "0.0.1", false, false)
 
 	if arguments["<operation>"] != nil {
 		operation := arguments["<operation>"].(string)
 		args := append([]string{operation}, arguments["<args>"].([]string)...)
+		mgmtLink := parseConnectionArgs(arguments)
 
 		switch operation {
 		case "version":
 			operations.Version(args)
 		case "query":
-			operations.Query(args)
+			operations.Query(args, mgmtLink)
 		case "gettypes":
-			operations.GetTypes(args)
+			operations.GetTypes(args, mgmtLink)
 		case "getattributes":
-			operations.GetAttributes(args)
+			operations.GetAttributes(args, mgmtLink)
 		case "getoperations":
-			operations.GetOperations(args)
+			operations.GetOperations(args, mgmtLink)
 		case "getannotations":
-			operations.GetAnnotations(args)
+			operations.GetAnnotations(args, mgmtLink)
 		case "getmgmtnodes":
-			operations.GetMgmtNodes(args)
+			operations.GetMgmtNodes(args, mgmtLink)
 		/*case "create":
 			commands.Create(args)
 		case "replace":
@@ -74,4 +76,22 @@ Description:
 			os.Exit(1)
 		}
 	}
+}
+
+func parseConnectionArgs(args map[string]interface{}) (mgmtLink utils.MgmtLink) {
+	mgmtLink = utils.MgmtLink{}
+
+	hostname := args["--hostname"]
+	if hostname == nil {
+		hostname = "localhost"
+	}
+
+	port := args["--port"]
+	if port == nil {
+		port = "5672"
+	}
+
+	mgmtLink.Url = fmt.Sprintf("%v:%v", hostname, port)
+
+	return
 }

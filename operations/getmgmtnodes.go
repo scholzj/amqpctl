@@ -6,11 +6,11 @@ import (
 	"strings"
 	"os"
 	"text/tabwriter"
-	"./utils"
+	"../utils"
 	"qpid.apache.org/amqp"
 )
 
-func GetMgmtNodes(args []string) {
+func GetMgmtNodes(args []string, link utils.MgmtLink) {
 	usage := `Usage:
   amqpctl getmgmtnodes
 
@@ -29,10 +29,9 @@ Description:
 		return
 	}
 
-	link := utils.MgmtLink{}
 	err = link.Connect()
 	if err != nil {
-		fmt.Printf("Ups, something went wrong: %v\n", err.Error())
+		fmt.Printf("Ups, something went wrong ... %v\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -46,11 +45,11 @@ Description:
 		if respProperties["statusCode"].(int32) == 200 {
 			printMgmtNodes(respProperties, respBody)
 		} else {
-			fmt.Printf("ERROR %v: %v\n", respProperties["statusCode"], respProperties["statusDescription"])
+			fmt.Printf("Ups, something went wrong ... %v: %v\n", respProperties["statusCode"], respProperties["statusDescription"])
 			os.Exit(1)
 		}
 	} else {
-		fmt.Printf("Ups, something went wrong: %v\n", err.Error())
+		fmt.Printf("Ups, something went wrong ... %v\n", err.Error())
 		os.Exit(1)
 	}
 }

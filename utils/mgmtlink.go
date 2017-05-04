@@ -7,6 +7,7 @@ import (
 )
 
 type MgmtLink struct {
+	Url string
 	container electron.Container
 	connection electron.Connection
 	session electron.Session
@@ -20,7 +21,7 @@ func (l *MgmtLink) Connect() (err error) {
 
 	l.container = electron.NewContainer("amqpctl")
 
-	l.connection, err = l.container.Dial("tcp", "localhost:5672", electron.Heartbeat(time.Duration(10 * time.Second)))
+	l.connection, err = l.container.Dial("tcp", l.Url, electron.Heartbeat(time.Duration(10 * time.Second)))
 	if err != nil {
 		return
 	}

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"os"
 	"text/tabwriter"
-	"./utils"
+	"../utils"
 	"qpid.apache.org/amqp"
 )
 
-func Query(args []string) {
+func Query(args []string, link utils.MgmtLink) {
 	usage := `Usage:
   amqpctl query [<entityType>] [<attributes>...]
 
@@ -34,10 +34,9 @@ Description:
 		return
 	}
 
-	link := utils.MgmtLink{}
 	err = link.Connect()
 	if err != nil {
-		fmt.Printf("Ups, something went wrong: %v\n", err.Error())
+		fmt.Printf("Ups, something went wrong ... %v\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -70,11 +69,11 @@ Description:
 		if respProperties["statusCode"].(int32) == 200 {
 			printQueryResults(respProperties, respBody)
 		} else {
-			fmt.Printf("ERROR %v: %v\n", respProperties["statusCode"], respProperties["statusDescription"])
+			fmt.Printf("Ups, something went wrong ... %v: %v\n", respProperties["statusCode"], respProperties["statusDescription"])
 			os.Exit(1)
 		}
 	} else {
-		fmt.Printf("Ups, something went wrong: %v\n", err.Error())
+		fmt.Printf("Ups, something went wrong ... %v\n", err.Error())
 		os.Exit(1)
 	}
 }
