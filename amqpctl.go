@@ -21,9 +21,16 @@ func main() {
     version   		Display the version of amqpctl.
 
 Options:
-  --hostname HOSTNAME	AMQP hostname (default localhost)
-  --port PORT		AMQP port (default 5672)
-  -h --help             Show this screen.
+  --hostname HOSTNAME		AMQP hostname (default localhost)
+  --port PORT			AMQP port (default 5672)
+  --username USERNAME   	AMQP username
+  --password PASSWORD   	AMQP password
+  --sasl-mechanism MECH 	AMQP SASL mechanism
+  --ssl-ca CAFILE		SSL certification authority certificate(s)
+  --ssl-skip-verify		Skip hostname verification
+  --ssl-cert CERTFILE		SSL certificate for client authentication
+  --ssl-key KEYFILE		SSL private key for client authentication
+  -h --help             	Show this screen.
 
 Description:
   The amqpctl command line tool implements AMQP Management specification

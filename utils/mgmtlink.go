@@ -8,6 +8,13 @@ import (
 
 type MgmtLink struct {
 	Url string
+	Username string
+	Password string
+	SaslMechanism string
+	SslCaFile string
+	SslSkipVerify bool
+	SslCertFile string
+	SslKeyFile string
 	container electron.Container
 	connection electron.Connection
 	session electron.Session
