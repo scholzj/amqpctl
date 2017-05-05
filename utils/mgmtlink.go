@@ -4,6 +4,9 @@ import (
 	"qpid.apache.org/electron"
 	"time"
 	"qpid.apache.org/amqp"
+	"crypto/x509"
+	"crypto/tls"
+	"net"
 )
 
 type MgmtLink struct {
@@ -11,10 +14,9 @@ type MgmtLink struct {
 	Username string
 	Password string
 	SaslMechanism string
-	SslCaFile string
+	BrokerCertificate *x509.CertPool
 	SslSkipVerify bool
-	SslCertFile string
-	SslKeyFile string
+	ClientCertificate *tls.Certificate
 	container electron.Container
 	connection electron.Connection
 	session electron.Session
@@ -28,7 +30,7 @@ func (l *MgmtLink) Connect() (err error) {
 
 	l.container = electron.NewContainer("amqpctl")
 
-	l.connection, err = l.container.Dial("tcp", l.Url, electron.Heartbeat(time.Duration(10 * time.Second)))
+	err = l.connectAmqp()
 	if err != nil {
 		return
 	}
@@ -49,6 +51,72 @@ func (l *MgmtLink) Connect() (err error) {
 	if err != nil {
 		return
 	}
+
+	return
+}
+
+func (l *MgmtLink) connectAmqp() (err error) {
+	err = nil
+	var conn net.Conn
+
+	if l.BrokerCertificate != nil {
+		conn, err = l.connectSsl()
+		if err != nil {
+			return
+		}
+	} else {
+		conn, err = l.connectTcp()
+		if err != nil {
+			return
+		}
+	}
+
+	var options []electron.ConnectionOption
+	options = append(options, electron.Heartbeat(time.Duration(10 * time.Second)))
+
+	if l.Username != "" && l.Password != "" {
+		options = append(options, electron.User(l.Username))
+		options = append(options, electron.Password([]byte(l.Password)))
+	}
+
+	if l.SaslMechanism != "" {
+		options = append(options, electron.SASLAllowedMechs(l.SaslMechanism))
+	}
+
+	l.connection, err = l.container.Connection(conn, options...)
+
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (l *MgmtLink) connectSsl() (conn net.Conn, err error) {
+	err = nil
+
+	tlsConfig := &tls.Config{}
+	tlsConfig.InsecureSkipVerify = l.SslSkipVerify
+
+	if l.BrokerCertificate != nil {
+	tlsConfig.ClientCAs = l.BrokerCertificate
+	}
+
+	if l.ClientCertificate != nil {
+	tlsConfig.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+	return l.ClientCertificate, nil
+	}
+	}
+
+	conn, err = tls.Dial("tcp", l.Url, tlsConfig)
+
+	return
+}
+
+func (l *MgmtLink) connectTcp() (conn net.Conn, err error) {
+	err = nil
+
+	conn, err = net.Dial("tcp", l.Url)
 
 	return
 }

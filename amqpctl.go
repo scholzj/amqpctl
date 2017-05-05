@@ -6,6 +6,9 @@ import (
 	"os"
 	"./operations"
 	"./utils"
+	"io/ioutil"
+	"crypto/x509"
+	"crypto/tls"
 )
 
 func main() {
@@ -88,6 +91,7 @@ Description:
 func parseConnectionArgs(args map[string]interface{}) (mgmtLink utils.MgmtLink) {
 	mgmtLink = utils.MgmtLink{}
 
+	// URL (Hostname / port)
 	hostname := args["--hostname"]
 	if hostname == nil {
 		hostname = "localhost"
@@ -99,6 +103,59 @@ func parseConnectionArgs(args map[string]interface{}) (mgmtLink utils.MgmtLink) 
 	}
 
 	mgmtLink.Url = fmt.Sprintf("%v:%v", hostname, port)
+
+	// Username
+	if username := args["--username"]; username != nil {
+		mgmtLink.Username = username.(string)
+	}
+
+	// Password
+	if password := args["--password"]; password != nil {
+		mgmtLink.Password = password.(string)
+	}
+
+	// SASL Mechanism
+	if sasl := args["--sasl-mechanism"]; sasl != nil {
+		mgmtLink.SaslMechanism = sasl.(string)
+	}
+
+	// CA certificate
+	if ca := args["--ssl-ca"]; ca != nil {
+		brokerCert, err := ioutil.ReadFile(ca.(string))
+		if err != nil {
+			fmt.Printf("Ups, something went wrong while loading CA certificate ... %s", err)
+			os.Exit(1)
+		}
+
+		brokerCertPool := x509.NewCertPool()
+		brokerCertPool.AppendCertsFromPEM(brokerCert)
+
+		mgmtLink.BrokerCertificate = brokerCertPool
+
+		// Hostname verification
+		if verify := args["--ssl-skip-verify"]; verify != nil {
+			mgmtLink.SslSkipVerify = true
+		} else {
+			mgmtLink.SslSkipVerify = false
+		}
+
+		// Client certificate and key
+		cert := args["--ssl-cert"]
+		key := args["--ssl-key"];
+		if cert != nil && key != nil {
+			memberKey, err := tls.LoadX509KeyPair(cert.(string), key.(string))
+			if err != nil {
+				fmt.Printf("Ups, something went wrong while loading client certificate / key ... %s", err)
+				os.Exit(1)
+			}
+
+			mgmtLink.ClientCertificate = &memberKey
+		}
+	}
+
+
+
+
 
 	return
 }
