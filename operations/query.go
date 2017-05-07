@@ -60,7 +60,7 @@ Description:
 		}
 
 	} else {
-		reqBody = map[interface{}]interface{}{"attributeNames": []interface{}{"name", "type", "identity"}}
+		reqBody = map[interface{}]interface{}{"attributeNames": []string{"name", "type", "identity"}}
 	}
 
 	respProperties, respBody, err := link.Operation(reqProperties, reqBody)
