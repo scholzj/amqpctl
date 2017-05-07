@@ -40,7 +40,7 @@ Description:
 
   See 'amqpctl <operation> --help' to read about a specific operations.
 `
-	arguments, _ := docopt.Parse(usage, nil, true, "0.0.1", false, false)
+	arguments, _ := docopt.Parse(usage, nil, true, "0.0.1", true, false)
 
 	if arguments["<operation>"] != nil {
 		operation := arguments["<operation>"].(string)
@@ -88,8 +88,8 @@ Description:
 	}
 }
 
-func parseConnectionArgs(args map[string]interface{}) (mgmtLink utils.MgmtLink) {
-	mgmtLink = utils.MgmtLink{}
+func parseConnectionArgs(args map[string]interface{}) (utils.MgmtLink) {
+	mgmtLink := utils.AmqpMgmtLink{}
 
 	// URL (Hostname / port)
 	hostname := args["--hostname"]
@@ -153,9 +153,5 @@ func parseConnectionArgs(args map[string]interface{}) (mgmtLink utils.MgmtLink) 
 		}
 	}
 
-
-
-
-
-	return
+	return utils.MgmtLink(&mgmtLink)
 }
