@@ -6,7 +6,7 @@ import (
 	"strings"
 	"os"
 	"text/tabwriter"
-	"../utils"
+	"github.com/scholzj/amqpctl/utils"
 	"qpid.apache.org/amqp"
 )
 

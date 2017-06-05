@@ -4,8 +4,8 @@ import (
 	"github.com/docopt/docopt-go"
 	"fmt"
 	"os"
-	"./operations"
-	"./utils"
+	"github.com/scholzj/amqpctl/operations"
+	"github.com/scholzj/amqpctl/utils"
 	"io/ioutil"
 	"crypto/x509"
 	"crypto/tls"
@@ -43,6 +43,7 @@ Description:
 	arguments, _ := docopt.Parse(usage, nil, true, "0.0.1", true, false)
 
 	if arguments["<operation>"] != nil {
+		//var err error
 		operation := arguments["<operation>"].(string)
 		args := append([]string{operation}, arguments["<args>"].([]string)...)
 		mgmtLink := parseConnectionArgs(arguments)

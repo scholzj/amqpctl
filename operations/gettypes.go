@@ -6,7 +6,7 @@ import (
 	"strings"
 	"os"
 	"text/tabwriter"
-	"../utils"
+	"github.com/scholzj/amqpctl/utils"
 	"qpid.apache.org/amqp"
 )
 
@@ -25,6 +25,7 @@ Description:
 		fmt.Printf("Invalid option: 'amqpctl %s'. Use flag '--help' to read about a specific subcommand.\n", strings.Join(args, " "))
 		os.Exit(1)
 	}
+
 	if len(arguments) == 0 {
 		return
 	}
