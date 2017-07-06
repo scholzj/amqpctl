@@ -63,17 +63,6 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	/*
-	--hostname HOSTNAME
-	--port PORT
-	--username USERNAME
-	--password PASSWORD
-	--sasl-mechanism MECH
-	--ssl-ca CAFILE
-	--ssl-skip-verify
-	--ssl-cert CERTFILE
-	--ssl-key KEYFILE
- 	*/
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.amqpctl.yaml)")
 	RootCmd.PersistentFlags().StringVarP(&amqpHostname, "hostname", "b","localhost", "AMQP hostname (default localhost)")
