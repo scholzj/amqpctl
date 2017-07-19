@@ -17,6 +17,11 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"text/tabwriter"
+	"os"
+	"qpid.apache.org/amqp"
+	"strings"
+	"github.com/scholzj/amqpctl/mgmtlink"
 )
 
 // typesCmd represents the types command
@@ -27,6 +32,7 @@ var typesCmd = &cobra.Command{
 	Long: `Get list of Manageable Entity Types that can be managed via this Management Node`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("types called")
+		getTypes(cmd, args)
 	},
 }
 
@@ -42,4 +48,60 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// typesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func getTypes(cmd *cobra.Command, args []string) {
+	link := mgmtlink.AmqpMgmtLink{}
+	err := link.ConfigureConnection(amqpCfg)
+	if err != nil {
+		fmt.Printf("Failed to configure AMQP connection ... %v\n", err.Error())
+		os.Exit(1)
+	}
+
+	err = link.Connect()
+	if err != nil {
+		fmt.Printf("Failed to open AMQP connection ... %v\n", err.Error())
+		os.Exit(1)
+	}
+
+	defer link.Close()
+
+	var reqProperties map[string]interface{}
+
+	if len(args) > 0 {
+		reqProperties = map[string]interface{}{"operation": "GET-TYPES", "entityType": args[0]}
+	} else {
+		reqProperties = map[string]interface{}{"operation": "GET-TYPES"}
+	}
+
+	respProperties, respBody, err := link.Operation(reqProperties, nil)
+
+	if err == nil {
+		if respProperties["statusCode"].(int64) == 200 {
+			printTypes(respProperties, respBody)
+		} else {
+			fmt.Printf("AMQP Management operation wsn't successfull ... %v: %v\n", respProperties["statusCode"], respProperties["statusDescription"])
+			os.Exit(1)
+		}
+	} else {
+		fmt.Printf("AMQP Management operation failed ... %v\n", err.Error())
+		os.Exit(1)
+	}
+}
+
+func printTypes(properties map[string]interface{}, body interface{}) {
+	w := tabwriter.NewWriter(os.Stdout, 10, 4, 3, ' ', 0)
+	fmt.Fprint(w, "TYPE\tPARENTS\t\n")
+
+	for entitytype, extends := range map[interface{}]interface{}(body.(amqp.Map)) {
+		parents := make([]string, len([]interface{}(extends.(amqp.List))))
+		for i, parent := range []interface{}(extends.(amqp.List)) {
+			parents[i] = parent.(string)
+		}
+
+
+		fmt.Fprintf(w, "%v\t%v\t\n", entitytype, strings.Join(parents, ", "))
+	}
+
+	w.Flush()
 }

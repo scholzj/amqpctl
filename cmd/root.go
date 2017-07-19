@@ -20,18 +20,20 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/scholzj/amqpctl/mgmtlink"
 )
 
 var cfgFile string
-var amqpHostname string
-var amqpPort int32
-var amqpUsername string
-var amqpPassword string
-var saslMechanism string
-var sslCaFile string
-var sslCertFile string
-var sslKeyFile string
-var sslSkipHostnameVerification bool
+var amqpCfg mgmtlink.AmqpConfiguration
+/*var AmqpHostname string
+var AmqpPort int32
+var AmqpUsername string
+var AmqpPassword string
+var SaslMechanism string
+var SslCaFile string
+var SslCertFile string
+var SslKeyFile string
+var SslSkipHostnameVerification bool*/
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -65,23 +67,23 @@ func init() {
 	// will be global for your application.
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.amqpctl.yaml)")
-	RootCmd.PersistentFlags().StringVarP(&amqpHostname, "hostname", "b","localhost", "AMQP hostname (default localhost)")
+	RootCmd.PersistentFlags().StringVarP(&amqpCfg.AmqpHostname, "hostname", "b","localhost", "AMQP hostname (default localhost)")
 	viper.BindPFlag("hostname", RootCmd.PersistentFlags().Lookup("hostname"))
-	RootCmd.PersistentFlags().Int32VarP(&amqpPort, "port","p", 5672, "AMQP port (default 5672)")
+	RootCmd.PersistentFlags().Int32VarP(&amqpCfg.AmqpPort, "port","p", 5672, "AMQP port (default 5672)")
 	viper.BindPFlag("port", RootCmd.PersistentFlags().Lookup("port"))
-	RootCmd.PersistentFlags().StringVar(&amqpUsername, "username","localhost", "AMQP username")
+	RootCmd.PersistentFlags().StringVar(&amqpCfg.AmqpUsername, "username","", "AMQP username")
 	viper.BindPFlag("username", RootCmd.PersistentFlags().Lookup("username"))
-	RootCmd.PersistentFlags().StringVar(&amqpPassword, "password","localhost", "AMQP password")
+	RootCmd.PersistentFlags().StringVar(&amqpCfg.AmqpPassword, "password","", "AMQP password")
 	viper.BindPFlag("password", RootCmd.PersistentFlags().Lookup("password"))
-	RootCmd.PersistentFlags().StringVar(&saslMechanism, "sasl-mechanism","localhost", "AMQP SASL mechanism")
+	RootCmd.PersistentFlags().StringVar(&amqpCfg.SaslMechanism, "sasl-mechanism","", "AMQP SASL mechanism")
 	viper.BindPFlag("sasl-mechanism", RootCmd.PersistentFlags().Lookup("sasl-mechanism"))
-	RootCmd.PersistentFlags().StringVar(&sslCaFile, "ssl-ca","localhost", "SSL certification authority certificate(s)")
+	RootCmd.PersistentFlags().StringVar(&amqpCfg.SslCaFile, "ssl-ca","", "SSL certification authority certificate(s)")
 	viper.BindPFlag("ssl-ca", RootCmd.PersistentFlags().Lookup("ssl-ca"))
-	RootCmd.PersistentFlags().StringVar(&sslCertFile, "ssl-cert","localhost", "SSL certificate for client authentication")
+	RootCmd.PersistentFlags().StringVar(&amqpCfg.SslCertFile, "ssl-cert","", "SSL certificate for client authentication")
 	viper.BindPFlag("ssl-cert", RootCmd.PersistentFlags().Lookup("ssl-cert"))
-	RootCmd.PersistentFlags().StringVar(&sslKeyFile, "ssl-key","localhost", "SSL private key for client authentication")
+	RootCmd.PersistentFlags().StringVar(&amqpCfg.SslKeyFile, "ssl-key","", "SSL private key for client authentication")
 	viper.BindPFlag("ssl-key", RootCmd.PersistentFlags().Lookup("ssl-key"))
-	RootCmd.PersistentFlags().BoolVar(&sslSkipHostnameVerification, "ssl-skip-verify",false, "Skip hostname verification")
+	RootCmd.PersistentFlags().BoolVar(&amqpCfg.SslSkipHostnameVerification, "ssl-skip-verify",false, "Skip hostname verification")
 	viper.BindPFlag("ssl-skip-verify", RootCmd.PersistentFlags().Lookup("ssl-skip-verify"))
 
 	// Cobra also supports local flags, which will only run
