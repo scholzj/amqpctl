@@ -31,36 +31,25 @@ var typesCmd = &cobra.Command{
 	Short: "Get list of Manageable Entity Types",
 	Long: `Get list of Manageable Entity Types that can be managed via this Management Node`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("types called")
-		getTypes(cmd, args)
+		getTypes(args)
 	},
 }
 
 func init() {
 	getCmd.AddCommand(typesCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// typesCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// typesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func getTypes(cmd *cobra.Command, args []string) {
+func getTypes(args []string) {
 	link := mgmtlink.AmqpMgmtLink{}
 	err := link.ConfigureConnection(amqpCfg)
 	if err != nil {
-		fmt.Printf("Failed to configure AMQP connection ... %v\n", err.Error())
+		fmt.Printf("Failed to configure AMQP connection: %v\n", err.Error())
 		os.Exit(1)
 	}
 
 	err = link.Connect()
 	if err != nil {
-		fmt.Printf("Failed to open AMQP connection ... %v\n", err.Error())
+		fmt.Printf("Failed to connect to AMQP endpoint: %v\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -80,11 +69,11 @@ func getTypes(cmd *cobra.Command, args []string) {
 		if respProperties["statusCode"].(int64) == 200 {
 			printTypes(respProperties, respBody)
 		} else {
-			fmt.Printf("AMQP Management operation wsn't successfull ... %v: %v\n", respProperties["statusCode"], respProperties["statusDescription"])
+			fmt.Printf("AMQP Management operation wsn't successfull: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"])
 			os.Exit(1)
 		}
 	} else {
-		fmt.Printf("AMQP Management operation failed ... %v\n", err.Error())
+		fmt.Printf("AMQP Management operation failed: %v\n", err.Error())
 		os.Exit(1)
 	}
 }
