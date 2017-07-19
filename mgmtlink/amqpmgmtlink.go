@@ -174,7 +174,13 @@ func (l *AmqpMgmtLink) Operation(reqProperties map[string]interface{}, reqBody m
 
 func (l *AmqpMgmtLink) parseResponse(msg amqp.Message) (properties map[string]interface{}, body interface{}) {
 	properties = msg.Properties()
-	body = msg.Body()
+	//body = msg.Body()
+	//msg.Unmarshal(&body)
+	var message interface{}
+	msg.Unmarshal(&message)
+	body = message
+	fmt.Print(message.(amqp.Map).GoString())
+	//body = msg.Body()
 	return
 }
 
