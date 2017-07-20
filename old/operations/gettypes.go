@@ -49,7 +49,7 @@ Description:
 	respProperties, respBody, err := link.Operation(reqProperties, nil)
 
 	if err == nil {
-		if respProperties["statusCode"].(int32) == 200 {
+		if respProperties["statusCode"].(int64) == 200 {
 			printTypes(respProperties, respBody)
 		} else {
 			fmt.Printf("Ups, something went wrong ... %v: %v\n", respProperties["statusCode"], respProperties["statusDescription"])

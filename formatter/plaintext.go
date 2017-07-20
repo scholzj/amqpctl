@@ -7,11 +7,7 @@ import (
 	"bytes"
 )
 
-type PlainTextFormatter struct {
-
-}
-
-func (f *PlainTextFormatter) Format(headers []string, rows [][]string) (bytes.Buffer) {
+func FormatPlainText(headers []string, rows [][]string) (bytes.Buffer) {
 	buf := new(bytes.Buffer)
 	w := tabwriter.NewWriter(buf, 10, 4, 3, ' ', 0)
 

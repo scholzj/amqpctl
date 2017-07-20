@@ -2,19 +2,19 @@ package operation
 
 import (
 	"fmt"
-	"os"
-	"text/tabwriter"
 	"qpid.apache.org/amqp"
 	"strings"
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"github.com/scholzj/amqpctl/formatter"
+	"bytes"
+	"errors"
 )
 
-func getTypes(link mgmtlink.MgmtLink, args []string, output formatter.OutputFormat) {
+func GetTypes(link mgmtlink.MgmtLink, entityType string) (output bytes.Buffer, err error) {
 	var reqProperties map[string]interface{}
 
-	if len(args) > 0 {
-		reqProperties = map[string]interface{}{"operation": "GET-TYPES", "entityType": args[0]}
+	if entityType != "" {
+		reqProperties = map[string]interface{}{"operation": "GET-TYPES", "entityType": entityType}
 	} else {
 		reqProperties = map[string]interface{}{"operation": "GET-TYPES"}
 	}
@@ -23,41 +23,34 @@ func getTypes(link mgmtlink.MgmtLink, args []string, output formatter.OutputForm
 
 	if err == nil {
 		if respProperties["statusCode"].(int64) == 200 {
-			printTypes(respProperties, respBody)
+			rows := parseResults(respBody)
+			output = formatter.FormatPlainText([]string{"TYPE", "PATERN"}, rows)
 		} else {
-			fmt.Printf("AMQP Management operation wsn't successfull: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"])
-			os.Exit(1)
+			err = errors.New(fmt.Sprintf("AMQP Management operation wasn't successfull: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
 		}
 	} else {
-		fmt.Printf("AMQP Management operation failed: %v\n", err.Error())
-		os.Exit(1)
+		err = errors.New(fmt.Sprintf("AMQP Management operation failed: %v\n", err.Error()))
 	}
 
-	//jsonString, _ := json.Marshal(respBody)
-
-	/*if output == formatter.YAML {
-
-	} else if output == formatter.JSON {
-		return nil
-	} else {
-		f := formatter.PlainTextFormatter{}
-		f.Format()
-	}*/
+	return
 }
 
-func printTypes(properties map[string]interface{}, body interface{}) {
-	w := tabwriter.NewWriter(os.Stdout, 10, 4, 3, ' ', 0)
-	fmt.Fprint(w, "TYPE\tPARENTS\t\n")
+func parseResults(body interface{}) (rows [][]string) {
+	rows = make([][]string, len(map[interface{}]interface{}(body.(amqp.Map))))
 
+	i := 0
 	for entitytype, extends := range map[interface{}]interface{}(body.(amqp.Map)) {
 		parents := make([]string, len([]interface{}(extends.(amqp.List))))
-		for i, parent := range []interface{}(extends.(amqp.List)) {
-			parents[i] = parent.(string)
+		for j, parent := range []interface{}(extends.(amqp.List)) {
+			parents[j] = parent.(string)
 		}
 
-
-		fmt.Fprintf(w, "%v\t%v\t\n", entitytype, strings.Join(parents, ", "))
+		row := make([]string, 2)
+		row[0] = entitytype.(string)
+		row[1] = strings.Join(parents, ", ")
+		rows[i] = row
+		i++
 	}
 
-	w.Flush()
+	return
 }

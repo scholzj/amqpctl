@@ -15,13 +15,11 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
-	"text/tabwriter"
 	"os"
-	"qpid.apache.org/amqp"
-	"strings"
 	"github.com/scholzj/amqpctl/mgmtlink"
+	"bytes"
+	"github.com/scholzj/amqpctl/operation"
 )
 
 // typesCmd represents the types command
@@ -55,42 +53,18 @@ func getTypes(args []string) {
 
 	defer link.Close()
 
-	var reqProperties map[string]interface{}
+	var output bytes.Buffer
 
 	if len(args) > 0 {
-		reqProperties = map[string]interface{}{"operation": "GET-TYPES", "entityType": args[0]}
+		output, err = operation.GetTypes(&link, args[0])
 	} else {
-		reqProperties = map[string]interface{}{"operation": "GET-TYPES"}
+		output, err = operation.GetTypes(&link, "")
 	}
 
-	respProperties, respBody, err := link.Operation(reqProperties, nil)
-
 	if err == nil {
-		if respProperties["statusCode"].(int64) == 200 {
-			printTypes(respProperties, respBody)
-		} else {
-			fmt.Printf("AMQP Management operation wsn't successfull: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"])
-			os.Exit(1)
-		}
+		fmt.Print(output.String())
 	} else {
 		fmt.Printf("AMQP Management operation failed: %v\n", err.Error())
 		os.Exit(1)
 	}
-}
-
-func printTypes(properties map[string]interface{}, body interface{}) {
-	w := tabwriter.NewWriter(os.Stdout, 10, 4, 3, ' ', 0)
-	fmt.Fprint(w, "TYPE\tPARENTS\t\n")
-
-	for entitytype, extends := range map[interface{}]interface{}(body.(amqp.Map)) {
-		parents := make([]string, len([]interface{}(extends.(amqp.List))))
-		for i, parent := range []interface{}(extends.(amqp.List)) {
-			parents[i] = parent.(string)
-		}
-
-
-		fmt.Fprintf(w, "%v\t%v\t\n", entitytype, strings.Join(parents, ", "))
-	}
-
-	w.Flush()
 }
