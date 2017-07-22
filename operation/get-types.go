@@ -24,7 +24,7 @@ func GetTypes(link mgmtlink.MgmtLink, entityType string) (output bytes.Buffer, e
 	if err == nil {
 		if respProperties["statusCode"].(int64) == 200 {
 			rows := parseResults(respBody)
-			output = formatter.FormatPlainText([]string{"TYPE", "PATERN"}, rows)
+			output = formatter.FormatPlainText([]string{"TYPE", "PARENT"}, rows)
 		} else {
 			err = errors.New(fmt.Sprintf("AMQP Management operation wasn't successfull: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
 		}
