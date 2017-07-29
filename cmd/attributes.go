@@ -17,33 +17,54 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/scholzj/amqpctl/mgmtlink"
+	"os"
+	"bytes"
+	"github.com/scholzj/amqpctl/operation"
 )
 
 // attributesCmd represents the attributes command
 var attributesCmd = &cobra.Command{
 	Use:   "attributes",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Retrieve the lists of attribute names",
+	Long: `Retrieve the lists of attribute names for the given Manageable Entity Types.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("attributes called")
+		getAttributes(args)
 	},
 }
 
 func init() {
 	getCmd.AddCommand(attributesCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func getAttributes(args []string) {
+	link := mgmtlink.AmqpMgmtLink{}
+	err := link.ConfigureConnection(amqpCfg)
+	if err != nil {
+		fmt.Printf("Failed to configure AMQP connection: %v\n", err.Error())
+		os.Exit(1)
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// attributesCmd.PersistentFlags().String("foo", "", "A help for foo")
+	err = link.Connect()
+	if err != nil {
+		fmt.Printf("Failed to connect to AMQP endpoint: %v\n", err.Error())
+		os.Exit(1)
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// attributesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	defer link.Close()
+
+	var output bytes.Buffer
+
+	if len(args) > 0 {
+		output, err = operation.GetAttributes(&link, args[0])
+	} else {
+		output, err = operation.GetAttributes(&link, "")
+	}
+
+	if err == nil {
+		fmt.Print(output.String())
+	} else {
+		fmt.Printf("AMQP Management operation failed: %v\n", err.Error())
+		os.Exit(1)
+	}
 }
