@@ -26,6 +26,7 @@ import (
 // mgmtnodesCmd represents the mgmtnodes command
 var mgmtnodesCmd = &cobra.Command{
 	Use:   "mgmtnodes",
+	Aliases: []string{"mgmtnode", "mgmt-nodes", "mgmt-node"},
 	Short: "Retrieve the list of addresses of other Management Nodes",
 	Long: `Retrieve the list of addresses of other Management Nodes which this Management Node is aware of.`,
 	Run: func(cmd *cobra.Command, args []string) {

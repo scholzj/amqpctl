@@ -25,7 +25,8 @@ import (
 
 // attributesCmd represents the attributes command
 var attributesCmd = &cobra.Command{
-	Use:   "attributes",
+	Use:   "attributes [entityType]",
+	Aliases: []string{"attribute"},
 	Short: "Retrieve the lists of attribute names",
 	Long: `Retrieve the lists of attribute names for the given Manageable Entity Types.`,
 	Run: func(cmd *cobra.Command, args []string) {

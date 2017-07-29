@@ -25,7 +25,8 @@ import (
 
 // operationsCmd represents the operations command
 var operationsCmd = &cobra.Command{
-	Use:   "operations",
+	Use:   "operations [entityType]",
+	Aliases: []string{"operation"},
 	Short: "Retrieve list of Management Operations and their arguments",
 	Long: `Retrieve the list of Management Operations (and the arguments they take)
 which can be performed via this Management Node.`,

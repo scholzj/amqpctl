@@ -24,7 +24,7 @@ import (
 
 // typesCmd represents the types command
 var typesCmd = &cobra.Command{
-	Use:   "types",
+	Use:   "types [entityType]",
 	Aliases: []string{"type"},
 	Short: "Get list of Manageable Entity Types",
 	Long: `Get list of Manageable Entity Types that can be managed via this Management Node`,

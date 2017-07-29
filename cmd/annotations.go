@@ -25,7 +25,8 @@ import (
 
 // annotationsCmd represents the annotations command
 var annotationsCmd = &cobra.Command{
-	Use:   "annotations",
+	Use:   "annotations [entityType]",
+	Aliases: []string{"annotation"},
 	Short: "Retrieve the list of Type Annotations",
 	Long: `Retrieve the list of Type Annotations implemented by each Manageable Entity Type.`,
 	Run: func(cmd *cobra.Command, args []string) {
