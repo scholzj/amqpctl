@@ -1,16 +1,25 @@
 package operation
 
 import (
-	"fmt"
 	"qpid.apache.org/amqp"
 	"strings"
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"github.com/scholzj/amqpctl/formatter"
 	"bytes"
-	"errors"
 )
 
 func GetTypes(link mgmtlink.MgmtLink, entityType string) (output bytes.Buffer, err error) {
+	body, err := Get(link, "GET-TYPES", entityType)
+
+	if err == nil {
+		rows := parseResults(body)
+		output = formatter.FormatPlainText([]string{"TYPE", "PARENT"}, rows)
+	}
+
+	return
+}
+
+/*func GetTypes(link mgmtlink.MgmtLink, entityType string) (output bytes.Buffer, err error) {
 	var reqProperties map[string]interface{}
 
 	if entityType != "" {
@@ -33,7 +42,7 @@ func GetTypes(link mgmtlink.MgmtLink, entityType string) (output bytes.Buffer, e
 	}
 
 	return
-}
+}*/
 
 func parseResults(body interface{}) (rows [][]string) {
 	rows = make([][]string, len(map[interface{}]interface{}(body.(amqp.Map))))
