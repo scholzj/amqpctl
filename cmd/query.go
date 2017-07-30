@@ -17,33 +17,68 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/scholzj/amqpctl/mgmtlink"
+	"os"
+	"bytes"
+	"github.com/scholzj/amqpctl/operation"
 )
+
+var allAttributes bool
 
 // queryCmd represents the query command
 var queryCmd = &cobra.Command{
-	Use:   "query",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "query [entityType] [attributes...]",
+	Short: "Retrieve selected attributes of Manageable Entities",
+	Long: `Retrieve selected attributes of Manageable Entities that can be read at this Management Node.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("query called")
+		query(args)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(queryCmd)
+	queryCmd.Flags().BoolVar(&allAttributes,"all-attributes",false, "Query all available attributes")
+}
 
-	// Here you will define your flags and configuration settings.
+func query(args []string) {
+	link := mgmtlink.AmqpMgmtLink{}
+	err := link.ConfigureConnection(amqpCfg)
+	if err != nil {
+		fmt.Printf("Failed to configure AMQP connection: %v\n", err.Error())
+		os.Exit(1)
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// queryCmd.PersistentFlags().String("foo", "", "A help for foo")
+	err = link.Connect()
+	if err != nil {
+		fmt.Printf("Failed to connect to AMQP endpoint: %v\n", err.Error())
+		os.Exit(1)
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// queryCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	defer link.Close()
+
+	var entityName string
+	if len(args) > 0 {
+		entityName = args[0]
+	} else {
+		entityName = ""
+	}
+
+	var attributes []string
+	if allAttributes {
+		attributes = []string{}
+	} else if len(args) > 1 {
+		attributes = args[1:]
+	} else {
+		attributes = []string{"name", "type", "identity"}
+	}
+
+	var output bytes.Buffer
+	output, err = operation.Query(&link, entityName, attributes)
+
+	if err == nil {
+		fmt.Print(output.String())
+	} else {
+		fmt.Printf("AMQP Management operation failed: %v\n", err.Error())
+		os.Exit(1)
+	}
 }
