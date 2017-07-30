@@ -1,4 +1,4 @@
-package utils
+package mgmtlink
 
 type MgmtLink interface {
 	Connect() error

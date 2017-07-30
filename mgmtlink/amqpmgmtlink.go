@@ -1,4 +1,4 @@
-package utils
+package mgmtlink
 
 import (
 	"qpid.apache.org/electron"
@@ -7,7 +7,22 @@ import (
 	"crypto/x509"
 	"crypto/tls"
 	"net"
+	"fmt"
+	"io/ioutil"
+	"os"
 )
+
+type AmqpConfiguration struct {
+	AmqpHostname string
+	AmqpPort int32
+	AmqpUsername string
+	AmqpPassword string
+	SaslMechanism string
+	SslCaFile string
+	SslCertFile string
+	SslKeyFile string
+	SslSkipHostnameVerification bool
+}
 
 type AmqpMgmtLink struct {
 	Url string
@@ -159,6 +174,64 @@ func (l *AmqpMgmtLink) Operation(reqProperties map[string]interface{}, reqBody m
 
 func (l *AmqpMgmtLink) parseResponse(msg amqp.Message) (properties map[string]interface{}, body interface{}) {
 	properties = msg.Properties()
+	/*//body = msg.Body()
+	//msg.Unmarshal(&body)
+	var message interface{}
+	msg.Unmarshal(&message)
+	body = message
+	fmt.Print(message.(amqp.Map).GoString())*/
 	body = msg.Body()
+	return
+}
+
+func (l *AmqpMgmtLink) ConfigureConnection(amqpCfg AmqpConfiguration) (err error) {
+	err = nil
+
+	// URL (Hostname / port)
+	l.Url = fmt.Sprintf("%v:%v", amqpCfg.AmqpHostname, amqpCfg.AmqpPort)
+
+	// Username
+	if amqpCfg.AmqpUsername != "" {
+		l.Username = amqpCfg.AmqpUsername
+	}
+
+	// Password
+	if amqpCfg.AmqpPassword != "" {
+		l.Password = amqpCfg.AmqpPassword
+	}
+
+	// SASL Mechanism
+	if amqpCfg.SaslMechanism != "" {
+		l.SaslMechanism = amqpCfg.SaslMechanism
+	}
+
+	// CA certificate
+	if amqpCfg.SslCaFile != "" {
+		brokerCert, err := ioutil.ReadFile(amqpCfg.SslCaFile)
+		if err != nil {
+			fmt.Printf("Ups, something went wrong while loading CA certificate %s ... %s", amqpCfg.SslCaFile, err)
+			os.Exit(1)
+		}
+
+		brokerCertPool := x509.NewCertPool()
+		brokerCertPool.AppendCertsFromPEM(brokerCert)
+
+		l.BrokerCertificate = brokerCertPool
+
+		// Hostname verification
+		l.SslSkipVerify = amqpCfg.SslSkipHostnameVerification
+
+		// Client certificate and key
+		if amqpCfg.SslCertFile != "" && amqpCfg.SslKeyFile != "" {
+			memberKey, err := tls.LoadX509KeyPair(amqpCfg.SslCertFile, amqpCfg.SslKeyFile)
+			if err != nil {
+				fmt.Printf("Ups, something went wrong while loading client certificate (%s) / key (%s) ... %s", amqpCfg.SslCertFile, amqpCfg.SslKeyFile, err)
+				os.Exit(1)
+			}
+
+			l.ClientCertificate = &memberKey
+		}
+	}
+
 	return
 }
