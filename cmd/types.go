@@ -19,7 +19,7 @@ import (
 	"os"
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"bytes"
-	"github.com/scholzj/amqpctl/operation"
+	get_operation "github.com/scholzj/amqpctl/operation/get"
 )
 
 // typesCmd represents the types command
@@ -56,9 +56,9 @@ func getTypes(args []string) {
 	var output bytes.Buffer
 
 	if len(args) > 0 {
-		output, err = operation.GetTypes(&link, args[0])
+		output, err = get_operation.GetTypes(&link, args[0])
 	} else {
-		output, err = operation.GetTypes(&link, "")
+		output, err = get_operation.GetTypes(&link, "")
 	}
 
 	if err == nil {

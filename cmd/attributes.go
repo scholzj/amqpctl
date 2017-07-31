@@ -20,7 +20,7 @@ import (
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"os"
 	"bytes"
-	"github.com/scholzj/amqpctl/operation"
+	get_operation "github.com/scholzj/amqpctl/operation/get"
 )
 
 // attributesCmd represents the attributes command
@@ -57,9 +57,9 @@ func getAttributes(args []string) {
 	var output bytes.Buffer
 
 	if len(args) > 0 {
-		output, err = operation.GetAttributes(&link, args[0])
+		output, err = get_operation.GetAttributes(&link, args[0])
 	} else {
-		output, err = operation.GetAttributes(&link, "")
+		output, err = get_operation.GetAttributes(&link, "")
 	}
 
 	if err == nil {

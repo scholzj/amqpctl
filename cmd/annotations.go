@@ -20,7 +20,7 @@ import (
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"os"
 	"bytes"
-	"github.com/scholzj/amqpctl/operation"
+	get_operation "github.com/scholzj/amqpctl/operation/get"
 )
 
 // annotationsCmd represents the annotations command
@@ -57,9 +57,9 @@ func getAnnotations(args []string) {
 	var output bytes.Buffer
 
 	if len(args) > 0 {
-		output, err = operation.GetAnnotations(&link, args[0])
+		output, err = get_operation.GetAnnotations(&link, args[0])
 	} else {
-		output, err = operation.GetAnnotations(&link, "")
+		output, err = get_operation.GetAnnotations(&link, "")
 	}
 
 	if err == nil {

@@ -20,7 +20,7 @@ import (
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"os"
 	"bytes"
-	"github.com/scholzj/amqpctl/operation"
+	get_operation "github.com/scholzj/amqpctl/operation/get"
 )
 
 // mgmtnodesCmd represents the mgmtnodes command
@@ -55,7 +55,7 @@ func getMgmtNodes(args []string) {
 	defer link.Close()
 
 	var output bytes.Buffer
-	output, err = operation.GetMgmtNodes(&link, "")
+	output, err = get_operation.GetMgmtNodes(&link, "")
 
 	if err == nil {
 		fmt.Print(output.String())

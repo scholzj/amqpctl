@@ -20,7 +20,7 @@ import (
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"os"
 	"bytes"
-	"github.com/scholzj/amqpctl/operation"
+	get_operation "github.com/scholzj/amqpctl/operation/get"
 )
 
 // operationsCmd represents the operations command
@@ -58,9 +58,9 @@ func getOperations(args []string) {
 	var output bytes.Buffer
 
 	if len(args) > 0 {
-		output, err = operation.GetOperations(&link, args[0])
+		output, err = get_operation.GetOperations(&link, args[0])
 	} else {
-		output, err = operation.GetOperations(&link, "")
+		output, err = get_operation.GetOperations(&link, "")
 	}
 
 	if err == nil {

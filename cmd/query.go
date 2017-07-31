@@ -20,7 +20,7 @@ import (
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"os"
 	"bytes"
-	"github.com/scholzj/amqpctl/operation"
+	query_operation "github.com/scholzj/amqpctl/operation/query"
 )
 
 var allAttributes bool
@@ -73,7 +73,7 @@ func query(args []string) {
 	}
 
 	var output bytes.Buffer
-	output, err = operation.Query(&link, entityName, attributes)
+	output, err = query_operation.Query(&link, entityName, attributes)
 
 	if err == nil {
 		fmt.Print(output.String())
