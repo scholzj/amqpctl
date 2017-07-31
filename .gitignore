@@ -25,4 +25,6 @@ _testmain.go
 
 .idea
 
+# Binaries
 amqpctl
+main
