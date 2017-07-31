@@ -1,0 +1,9 @@
+machine:
+  services:
+    - docker
+
+dependencies:
+  pre:
+    - sudo add-apt-repository ppa:qpid/testing  --yes
+    - sudo apt-get update -q
+    - sudo apt-get install -q -y libqpid-proton10-dev
