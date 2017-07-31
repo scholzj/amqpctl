@@ -23,8 +23,16 @@ func Query(link mgmtlink.MgmtLink, entityType string, attributes []string) (outp
 
 	respProperties, respBody, err := link.Operation(reqProperties, reqBody)
 
+	var statusCode int
+	switch respProperties["statusCode"].(type) {
+	case int32:
+		statusCode = int(respProperties["statusCode"].(int32))
+	case int64:
+		statusCode = int(respProperties["statusCode"].(int64))
+	}
+
 	if err == nil {
-		if respProperties["statusCode"].(int64) == 200 {
+		if statusCode == 200 {
 			headers := parseQueryHeaders(respBody)
 			rows := parseQueryResults(respBody)
 			output = formatter.FormatPlainText(headers, rows)
