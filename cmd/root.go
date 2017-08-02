@@ -25,15 +25,6 @@ import (
 
 var cfgFile string
 var amqpCfg mgmtlink.AmqpConfiguration
-/*var AmqpHostname string
-var AmqpPort int32
-var AmqpUsername string
-var AmqpPassword string
-var SaslMechanism string
-var SslCaFile string
-var SslCertFile string
-var SslKeyFile string
-var SslSkipHostnameVerification bool*/
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
