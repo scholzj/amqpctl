@@ -14,7 +14,7 @@ import (
 
 type AmqpConfiguration struct {
 	AmqpHostname string
-	AmqpPort int32
+	AmqpPort int
 	AmqpUsername string
 	AmqpPassword string
 	SaslMechanism string

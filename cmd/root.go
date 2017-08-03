@@ -23,7 +23,7 @@ import (
 	"github.com/scholzj/amqpctl/mgmtlink"
 )
 
-var cfgFile string
+//var cfgFile string
 var amqpCfg mgmtlink.AmqpConfiguration
 
 // RootCmd represents the base command when called without any subcommands
@@ -57,10 +57,11 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.amqpctl.yaml)")
+	RootCmd.PersistentFlags().String("config", "", "config file (default is $HOME/.amqpctl.yaml and ./.amqpctl.yaml)")
+	viper.BindPFlag("config", RootCmd.PersistentFlags().Lookup("config"))
 	RootCmd.PersistentFlags().StringVarP(&amqpCfg.AmqpHostname, "hostname", "b","localhost", "AMQP hostname (default localhost)")
 	viper.BindPFlag("hostname", RootCmd.PersistentFlags().Lookup("hostname"))
-	RootCmd.PersistentFlags().Int32VarP(&amqpCfg.AmqpPort, "port","p", 5672, "AMQP port (default 5672)")
+	RootCmd.PersistentFlags().IntVarP(&amqpCfg.AmqpPort, "port","p", 5672, "AMQP port (default 5672)")
 	viper.BindPFlag("port", RootCmd.PersistentFlags().Lookup("port"))
 	RootCmd.PersistentFlags().StringVar(&amqpCfg.AmqpUsername, "username","", "AMQP username")
 	viper.BindPFlag("username", RootCmd.PersistentFlags().Lookup("username"))
@@ -84,9 +85,11 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
+	viper.AutomaticEnv() // read in environment variables that match
+
+	if viper.GetString("config") != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(viper.GetString("config"))
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -96,14 +99,24 @@ func initConfig() {
 		}
 
 		// Search config in home directory with name ".amqpctl" (without extension).
+		viper.AddConfigPath(".")
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".amqpctl")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
-
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+
+		amqpCfg.AmqpHostname = viper.GetString("hostname")
+		amqpCfg.AmqpPort = viper.GetInt("port")
+		amqpCfg.AmqpUsername = viper.GetString("username")
+		amqpCfg.AmqpPassword = viper.GetString("password")
+		amqpCfg.SaslMechanism = viper.GetString("sasl-mechanism")
+		amqpCfg.SslCaFile = viper.GetString("ssl-ca")
+		amqpCfg.SslCertFile = viper.GetString("ssl-cert")
+		amqpCfg.SslKeyFile = viper.GetString("ssl-key")
+		amqpCfg.SslSkipHostnameVerification = viper.GetBool("ssl-skip-verify")
+
 	}
 }
