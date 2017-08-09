@@ -7,18 +7,18 @@ jobs:
     steps:
       - run:
           name: Install dependencies
-          command: sudo yum install -y git tar curl wget
+          command: yum install -y git tar curl wget
       - run:
           name: Install Go
           command: |
             curl -O https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz
-            sudo tar -C /usr/local -xzf go1.8.3.linux-amd64.tar.gz
+            tar -C /usr/local -xzf go1.8.3.linux-amd64.tar.gz
       - checkout
       - run:
           name: Install Qpid dependencies
           command: |
-            sudo curl -o /etc/yum.repos.d/qpid-proton-devel.repo http://repo.effectivemessaging.com/qpid-proton-stable.repo
-            sudo yum install -y qpid-proton-c-devel
+            curl -o /etc/yum.repos.d/qpid-proton-devel.repo http://repo.effectivemessaging.com/qpid-proton-stable.repo
+            yum install -y qpid-proton-c-devel
       - run:
           name: Get dependencies
           command: go get
