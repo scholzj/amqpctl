@@ -13,6 +13,7 @@ jobs:
           command: |
             curl -o /tmp/golang.tar.gz https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz
             tar -C /usr/local -xzf /tmp/golang.tar.gz
+            echo 'export PATH=/usr/local/go/bin:$PATH' >> $BASH_ENV
       - checkout
       - run:
           name: Install Qpid dependencies
