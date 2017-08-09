@@ -11,8 +11,8 @@ jobs:
       - run:
           name: Install Go
           command: |
-            curl -o https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz /tmp/go1.8.3.linux-amd64.tar.gz
-            tar -C /usr/local -xzf /tmp/go1.8.3.linux-amd64.tar.gz
+            curl -o /tmp/golang.tar.gz https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz
+            tar -C /usr/local -xzf /tmp/golang.tar.gz
       - checkout
       - run:
           name: Install Qpid dependencies
