@@ -2,18 +2,23 @@ version: 2
 jobs:
   build:
     docker:
-      # CircleCI Go images available at: https://hub.docker.com/r/circleci/golang/
-      - image: circleci/golang:1.8
-    working_directory: /go/src/github.com/scholzj/amqpctl
+      - image: centos:7
+    working_directory: ~/go/src/github.com/scholzj/amqpctl
     steps:
-      - checkout
       - run:
           name: Install dependencies
+          command: sudo yum install -y git tar curl wget
+      - run:
+          name: Install Go
           command: |
-            sudo apt-get install software-properties-common python-software-properties
-            sudo add-apt-repository ppa:qpid/testing --yes
-            sudo apt-get update -q
-            sudo apt-get install -q -y libqpid-proton10-dev
+            curl -O https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz
+            sudo tar -C /usr/local -xzf go1.8.3.linux-amd64.tar.gz
+      - checkout
+      - run:
+          name: Install Qpid dependencies
+          command: |
+            sudo curl -o /etc/yum.repos.d/qpid-proton-devel.repo http://repo.effectivemessaging.com/qpid-proton-stable.repo
+            sudo yum install -y qpid-proton-c-devel
       - run:
           name: Get dependencies
           command: go get
