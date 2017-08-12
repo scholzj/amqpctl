@@ -12,11 +12,22 @@ jobs:
             sudo curl -o /etc/yum.repos.d/qpid-proton-devel.repo http://repo.effectivemessaging.com/qpid-proton-stable.repo
             sudo yum install -y qpid-proton-c-devel
       - run:
-          name: Get dependencies
-          command: go get
+          name: Install Godep
+          command: go get github.com/tools/godep
+      #- run:
+      #    name: Get dependencies
+      #    command: go get
       - run:
           name: Build
-          command: go build
+          command: godep go build
       - run:
           name: Test
-          command: go test
+          command: godep go test
+      - run:
+          name: Create Artifacts directory
+          command: mkdir -p artifacts
+      - run:
+          name: Copy artifacts
+          command: cp ./amqpctl artifacts/
+      - store_artifacts:
+          path: artifacts
