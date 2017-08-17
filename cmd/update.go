@@ -72,7 +72,7 @@ func update(args []string) {
 			}
 
 		} else {
-			fmt.Printf("At least one updated attribue must be specified!\n")
+			fmt.Printf("At least one attribue=value pair has to be specified!\n")
 			os.Exit(1)
 		}
 
