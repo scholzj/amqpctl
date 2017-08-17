@@ -22,6 +22,8 @@ import (
 	delete_operation "github.com/scholzj/amqpctl/operation/delete"
 )
 
+var deleteAttributeName string
+
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
 	Use:   "delete [identity/key]",
@@ -34,7 +36,7 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(deleteCmd)
-	deleteCmd.Flags().StringVar(&attributeName,"attribute","identity", "Delete based on specific attribute (index)")
+	deleteCmd.Flags().StringVar(&deleteAttributeName,"attribute","identity", "Delete based on specific attribute (index)")
 }
 
 func delete(args []string) {
@@ -60,7 +62,7 @@ func delete(args []string) {
 		identityOrKey = ""
 	}
 
-	err = delete_operation.Delete(&link, identityOrKey, attributeName)
+	err = delete_operation.Delete(&link, identityOrKey, deleteAttributeName)
 
 	if err == nil {
 		fmt.Print("Manageable Entity successfully deleted.\n")
