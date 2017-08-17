@@ -26,7 +26,7 @@ var deleteAttributeName string
 
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
-	Use:   "delete [identity/key]",
+	Use:   "delete identity/key",
 	Short: "Delete a Manageable Entity.",
 	Long: `Delete a Manageable Entity.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -59,7 +59,8 @@ func delete(args []string) {
 	if len(args) > 0 {
 		identityOrKey = args[0]
 	} else {
-		identityOrKey = ""
+		fmt.Printf("Identity must be specified!\n")
+		os.Exit(1)
 	}
 
 	err = delete_operation.Delete(&link, identityOrKey, deleteAttributeName)
