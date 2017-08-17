@@ -23,11 +23,11 @@ import (
 	read_operation "github.com/scholzj/amqpctl/operation/read"
 )
 
-var attributeName string
+var readAttributeName string
 
 // readCmd represents the read command
 var readCmd = &cobra.Command{
-	Use:   "read [identity/key]",
+	Use:   "read identity/key",
 	Short: "Retrieve the attributes of a Manageable Entity.",
 	Long: `Retrieve the attributes of a Manageable Entity.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -37,7 +37,7 @@ var readCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(readCmd)
-	readCmd.Flags().StringVar(&attributeName,"attribute","identity", "Read based on specific attribute (index)")
+	readCmd.Flags().StringVar(&readAttributeName,"attribute","identity", "Read based on specific attribute (index)")
 }
 
 func read(args []string) {
@@ -60,11 +60,12 @@ func read(args []string) {
 	if len(args) > 0 {
 		identityOrKey = args[0]
 	} else {
-		identityOrKey = ""
+		fmt.Printf("Identity must be specified!\n")
+		os.Exit(1)
 	}
 
 	var output bytes.Buffer
-	output, err = read_operation.Read(&link, identityOrKey, attributeName)
+	output, err = read_operation.Read(&link, identityOrKey, readAttributeName)
 
 	if err == nil {
 		fmt.Print(output.String())
