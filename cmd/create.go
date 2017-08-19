@@ -60,6 +60,12 @@ func create(args []string) {
 			createPair := strings.SplitN(change, "=", 2)
 			createMap[createPair[0]] = createPair[1]
 		}
+
+		if _, ok := createMap["type"]; !ok {
+			fmt.Printf("'type' attribute is mandatory and has to be specified!\n")
+			os.Exit(1)
+		}
+
 	} else {
 		fmt.Printf("At least one attribue=value pair has to be specified!\n")
 		os.Exit(1)
