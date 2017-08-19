@@ -9,11 +9,11 @@ import (
 	"errors"
 )
 
-func Create(link mgmtlink.MgmtLink, createMap map[interface{}]interface{}) (output bytes.Buffer, err error) {
+func Create(link mgmtlink.MgmtLink, entityType string, createMap map[interface{}]interface{}) (output bytes.Buffer, err error) {
 	var reqProperties map[string]interface{}
 	var reqBody map[interface{}]interface{}
 
-	reqProperties = map[string]interface{}{"operation": "CREATE"}
+	reqProperties = map[string]interface{}{"operation": "CREATE", "type": entityType}
 
 	reqBody = createMap
 

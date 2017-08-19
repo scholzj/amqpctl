@@ -66,7 +66,7 @@ func create(args []string) {
 	}
 
 	var output bytes.Buffer
-	output, err = create_operation.Create(&link, createMap)
+	output, err = create_operation.Create(&link, createMap["type"].(string), createMap)
 
 	if err == nil {
 		fmt.Print(output.String())
