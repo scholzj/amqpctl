@@ -10,9 +10,9 @@ func Get(link mgmtlink.MgmtLink, getOperation string, entityType string) (body i
 	var reqProperties map[string]interface{}
 
 	if entityType != "" {
-		reqProperties = map[string]interface{}{"operation": getOperation, "entityType": entityType}
+		reqProperties = map[string]interface{}{"name": "self", "type": "org.amqp.management", "operation": getOperation, "entityType": entityType}
 	} else {
-		reqProperties = map[string]interface{}{"operation": getOperation}
+		reqProperties = map[string]interface{}{"name": "self", "type": "org.amqp.management", "operation": getOperation}
 	}
 
 	respProperties, respBody, err := link.Operation(reqProperties, nil)
