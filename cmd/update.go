@@ -24,13 +24,14 @@ import (
 	"strings"
 )
 
-var updateAttributeName string
+var updateType string
 
 // readCmd represents the read command
 var updateCmd = &cobra.Command{
-	Use:   "update identity/key attribute1=value [attribute2=value...]",
+	Use:   "update attributeName/attributeValue attribute1=value [attribute2=value...]",
+	Example: "amqpctl update name/myListener1 port=5672 saslMechanism=ANONYMOUS",
 	Short: "Update a Manageable Entity.",
-	Long: `Update a Manageable Entity.`,
+	Long: `Update a Manageable Entity. The entity is specified using an argument in the form of attributeName/attributeValue (e.g. name/myListener) and followed by one or more of atrribute=value arguments.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		update(args)
 	},
@@ -38,7 +39,7 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(updateCmd)
-	updateCmd.Flags().StringVar(&updateAttributeName,"attribute","identity", "Update entity based on specific attribute (index)")
+	updateCmd.Flags().StringVar(&updateType,"type","", "Type of the Manageable entity which should be updated")
 }
 
 func update(args []string) {
@@ -57,11 +58,24 @@ func update(args []string) {
 
 	defer link.Close()
 
-	var identityOrKey string
+	var attributeName string
+	var attributeValue string
 	var changeMap map[interface{}]interface{}
 	changeMap = make(map[interface{}]interface{})
-	if len(args) > 0 {
-		identityOrKey = args[0]
+	if len(args) > 0 && strings.Contains(args[0], "/"){
+		readPair := strings.SplitN(args[0], "/", 2)
+
+		if readPair[0] == "identity" {
+			attributeName = "identity"
+			attributeValue = readPair[1]
+		} else if readPair[0] == "name" {
+			attributeName = "name"
+			attributeValue = readPair[1]
+		} else {
+			// WD 11 allows to query all attributes
+			attributeName = readPair[0]
+			attributeValue = readPair[1]
+		}
 
 		if len(args) > 1 {
 			changes := args[1:]
@@ -70,19 +84,17 @@ func update(args []string) {
 				changePair := strings.SplitN(change, "=", 2)
 				changeMap[changePair[0]] = changePair[1]
 			}
-
 		} else {
 			fmt.Printf("At least one attribue=value pair has to be specified!\n")
 			os.Exit(1)
 		}
-
 	} else {
 		fmt.Printf("Identity must be specified!\n")
 		os.Exit(1)
 	}
 
 	var output bytes.Buffer
-	output, err = update_operation.Update(&link, identityOrKey, updateAttributeName, changeMap)
+	output, err = update_operation.Update(&link, updateType, attributeName, attributeValue, changeMap)
 
 	if err == nil {
 		fmt.Print(output.String())
