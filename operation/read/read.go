@@ -9,13 +9,25 @@ import (
 	"errors"
 )
 
-func Read(link mgmtlink.MgmtLink, identity string, attributeName string) (output bytes.Buffer, err error) {
-	var reqProperties map[string]interface{}
+func Read(link mgmtlink.MgmtLink, entityType string, attributeName string, attributeValue string) (output bytes.Buffer, err error) {
+	reqProperties := make(map[string]interface{})
+	reqProperties["operation"] = "READ"
 
 	if attributeName == "identity" {
-		reqProperties = map[string]interface{}{"operation": "READ", "identity": identity}
+		reqProperties["identity"] = attributeValue
+	} else if attributeName == "name" {
+		reqProperties["name"] = attributeValue
+		// Ready for WD11
+		reqProperties["index"] = attributeName
+		reqProperties["key"] = attributeValue
 	} else {
-		reqProperties = map[string]interface{}{"operation": "READ", "index": attributeName, "key": identity}
+		// Ready for WD11
+		reqProperties["index"] = attributeName
+		reqProperties["key"] = attributeValue
+	}
+
+	if entityType != "" {
+		reqProperties["type"] = entityType
 	}
 
 	respProperties, respBody, err := link.Operation(reqProperties, nil)
@@ -34,7 +46,7 @@ func Read(link mgmtlink.MgmtLink, identity string, attributeName string) (output
 			rows := parseReadResults(respBody)
 			output = formatter.FormatPlainText(headers, rows)
 		} else if statusCode == 400 {
-			err = errors.New(fmt.Sprintf("Specified index is not supported: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
+			err = errors.New(fmt.Sprintf("Bad request: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
 		} else if statusCode == 404 {
 			err = errors.New(fmt.Sprintf("No manageable entities matching the request criteria found: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
 		} else {
