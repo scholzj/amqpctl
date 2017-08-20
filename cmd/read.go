@@ -24,7 +24,6 @@ import (
 	"strings"
 )
 
-var readAttributeName string
 var readType string
 
 // readCmd represents the read command
@@ -40,7 +39,6 @@ var readCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(readCmd)
-	readCmd.Flags().StringVar(&readAttributeName,"attribute","identity", "Read based on specific attribute (index)")
 	readCmd.Flags().StringVar(&readType,"type","", "Type of the Manageable entity which should be read")
 }
 
