@@ -31,7 +31,7 @@ var readCmd = &cobra.Command{
 	Use:   "read attributeName/attributeValue",
 	Example: "amqpctl read name/myListener1",
 	Short: "Retrieve the attributes of a Manageable Entity.",
-	Long: `Retrieve the attributes of a Manageable Entity. The argument is in the form of attributeName/attributeValue (e.g. name/myListener).`,
+	Long: `Retrieve the attributes of a Manageable Entity. The entity is specified using an argument in the form of attributeName/attributeValue (e.g. name/myListener).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		read(args)
 	},
@@ -75,7 +75,7 @@ func read(args []string) {
 			attributeValue = readPair[1]
 		}
 	} else {
-		fmt.Printf("Missing argument: Name or identity of a Manageable Entity has to be specified inthe format identity/value or name/value (e.g. name/myListener)!\n")
+		fmt.Printf("Missing argument: The entity has to be specified using an argument in the form of attributeName/attributeValue (e.g. name/myListener)!\n")
 		os.Exit(1)
 	}
 

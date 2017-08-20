@@ -20,15 +20,17 @@ import (
 	"github.com/scholzj/amqpctl/mgmtlink"
 	"os"
 	delete_operation "github.com/scholzj/amqpctl/operation/delete"
+	"strings"
 )
 
-var deleteAttributeName string
+var deleteType string
 
 // deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
-	Use:   "delete identity/key",
+	Use:   "delete attributeName/attributeValue",
+	Example: "amqpctl delete name/myListener1",
 	Short: "Delete a Manageable Entity.",
-	Long: `Delete a Manageable Entity.`,
+	Long: `Delete a Manageable Entity. The entity is specified using an argument in the form of attributeName/attributeValue (e.g. name/myListener).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		delete(args)
 	},
@@ -36,7 +38,7 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(deleteCmd)
-	deleteCmd.Flags().StringVar(&deleteAttributeName,"attribute","identity", "Delete based on specific attribute (index)")
+	deleteCmd.Flags().StringVar(&deleteType,"type","", "Type of the Manageable entity which should be deleted")
 }
 
 func delete(args []string) {
@@ -55,15 +57,28 @@ func delete(args []string) {
 
 	defer link.Close()
 
-	var identityOrKey string
-	if len(args) > 0 {
-		identityOrKey = args[0]
+	var attributeName string
+	var attributeValue string
+	if len(args) > 0 && strings.Contains(args[0], "/"){
+		readPair := strings.SplitN(args[0], "/", 2)
+
+		if readPair[0] == "identity" {
+			attributeName = "identity"
+			attributeValue = readPair[1]
+		} else if readPair[0] == "name" {
+			attributeName = "name"
+			attributeValue = readPair[1]
+		} else {
+			// WD 11 allows to query all attributes
+			attributeName = readPair[0]
+			attributeValue = readPair[1]
+		}
 	} else {
-		fmt.Printf("Identity must be specified!\n")
+		fmt.Printf("Missing argument: The entity has to be specified using an argument in the form of attributeName/attributeValue (e.g. name/myListener)!\n")
 		os.Exit(1)
 	}
 
-	err = delete_operation.Delete(&link, identityOrKey, deleteAttributeName)
+	err = delete_operation.Delete(&link, readType, attributeName, attributeValue)
 
 	if err == nil {
 		fmt.Print("Manageable Entity successfully deleted.\n")

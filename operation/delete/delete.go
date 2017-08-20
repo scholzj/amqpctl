@@ -6,13 +6,25 @@ import (
 	"errors"
 )
 
-func Delete(link mgmtlink.MgmtLink, identity string, attributeName string) (err error) {
-	var reqProperties map[string]interface{}
+func Delete(link mgmtlink.MgmtLink, entityType string, attributeName string, attributeValue string) (err error) {
+	reqProperties := make(map[string]interface{})
+	reqProperties["operation"] = "DELETE"
 
 	if attributeName == "identity" {
-		reqProperties = map[string]interface{}{"operation": "DELETE", "identity": identity}
+		reqProperties["identity"] = attributeValue
+	} else if attributeName == "name" {
+		reqProperties["name"] = attributeValue
+		// Ready for WD11
+		reqProperties["index"] = attributeName
+		reqProperties["key"] = attributeValue
 	} else {
-		reqProperties = map[string]interface{}{"operation": "DELETE", "index": attributeName, "key": identity}
+		// Ready for WD11
+		reqProperties["index"] = attributeName
+		reqProperties["key"] = attributeValue
+	}
+
+	if entityType != "" {
+		reqProperties["type"] = entityType
 	}
 
 	respProperties, _, err := link.Operation(reqProperties, nil)
@@ -29,7 +41,7 @@ func Delete(link mgmtlink.MgmtLink, identity string, attributeName string) (err 
 		if statusCode == 204 {
 			err = nil
 		} else if statusCode == 400 {
-			err = errors.New(fmt.Sprintf("Specified index is not supported: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
+			err = errors.New(fmt.Sprintf("Bad Request: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
 		} else if statusCode == 404 {
 			err = errors.New(fmt.Sprintf("No manageable entities matching the request criteria found: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
 		} else {
