@@ -33,7 +33,7 @@ var RootCmd = &cobra.Command{
 	Long: `amqpctl is a command line based client for the AMQP Management protocol. It
 is written in Go language and tested against Apache Qpid Dispatch AMQP router.
 It should be compatible with all implementations of AMQP Management Working
-Draft 10. amqpctl is using Apache Qpid Proton as its underlying AMQP client.
+Draft 9 and 11. amqpctl is using Apache Qpid Proton as its underlying AMQP client.
 Apache Qpid Proton has to be installed to use amqpctl. See amqpctl --help for
 more details about the usage and supported operations.`,
 	// Uncomment the following line if your bare application
