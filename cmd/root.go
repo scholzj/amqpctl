@@ -106,7 +106,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		fmt.Printf("Using config file: %v\n\n", viper.ConfigFileUsed())
 
 		amqpCfg.AmqpHostname = viper.GetString("hostname")
 		amqpCfg.AmqpPort = viper.GetInt("port")
