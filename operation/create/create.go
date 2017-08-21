@@ -15,6 +15,10 @@ func Create(link mgmtlink.MgmtLink, entityType string, createMap map[interface{}
 
 	reqProperties = map[string]interface{}{"operation": "CREATE", "type": entityType}
 
+	if name, ok := createMap["name"]; ok {
+		reqProperties["name"] = name
+	}
+
 	reqBody = createMap
 
 	respProperties, respBody, err := link.Operation(reqProperties, reqBody)
@@ -33,7 +37,7 @@ func Create(link mgmtlink.MgmtLink, entityType string, createMap map[interface{}
 			rows := parseCreateResults(respBody)
 			output = formatter.FormatPlainText(headers, rows)
 		} else if statusCode == 400 {
-			err = errors.New(fmt.Sprintf("Specified index is not supported: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
+			err = errors.New(fmt.Sprintf("Bad Request: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
 		} else if statusCode == 404 {
 			err = errors.New(fmt.Sprintf("No manageable entities matching the request criteria found: %v (%v)\n", respProperties["statusCode"], respProperties["statusDescription"]))
 		} else {

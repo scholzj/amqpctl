@@ -27,6 +27,7 @@ import (
 // readCmd represents the read command
 var createCmd = &cobra.Command{
 	Use:   "create attribute1=value [attribute2=value...]",
+	Example:   "create type=listener name=myListener port=9999 host=0.0.0.0",
 	Short: "Create a new Manageable Entity.",
 	Long: `Create a new Manageable Entity.`,
 	Run: func(cmd *cobra.Command, args []string) {
