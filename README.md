@@ -284,3 +284,4 @@ See `amqpctl help` for more details about the usage and `amqpctl help <operation
 * Unit tests
 * Integration tests
 * Create a static build so that not everyone has to install Proton
+* Add possibility to call custom operations
