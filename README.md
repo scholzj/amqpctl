@@ -4,6 +4,8 @@
 
 `amqpctl` is a command line based client for the AMQP Management protocol. It is written in Go language and tested against [Apache Qpid Dispatch](http://qpid.apache.org/components/dispatch-router/index.html) AMQP router. It should be compatible with all implementations of AMQP Management Working Draft 9 and Working Draft 11.
 
+[![asciicast](https://asciinema.org/a/cUNZNJ74WtpgZJJ0o3Up1iuo4.png)](https://asciinema.org/a/cUNZNJ74WtpgZJJ0o3Up1iuo4)
+
 <!-- TOC -->
 
 - [amqpctl](#amqpctl)
