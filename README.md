@@ -33,6 +33,8 @@
 
 `amqpctl` is using [Apache Qpid Proton](http://qpid.apache.org/proton/index.html) as its underlying AMQP client. Apache Qpid Proton has to be installed to use `amqpctl`. For some features such as SSL support and SASL authentication you will also need OpenSSL or CyrusSASL installed.
 
+It is written in [Go language](https://golang.org) and requires at least Go version 1.8.
+
 The tool is written using [Cobra](https://github.com/spf13/cobra) and [Viper](https://github.com/spf13/viper) libraries for creating CLI application in Go language.
 
 ## Installation
